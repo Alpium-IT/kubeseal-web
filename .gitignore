@@ -1,0 +1,2 @@
+bin/kubeseal
+k8s/envs/epyc/**

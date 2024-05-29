@@ -1,0 +1,26 @@
+# clusters dictionary
+# 
+# CLUSTERNAME:
+#    url: <URL OF SEALED-SECRETS ROUTE>
+#    namespacePrefix: "dev-"  # will be prepended to the namespace's name
+#    enabled: true | false    # set the cluste's checkbox to checked or unchecked initially
+
+defaults:
+  enable-cluster-wide-encryption: true
+  max-secrets: 5
+
+clusters:
+  east:
+    url: http://cert.sealedsecrets.east.example.com/v1/cert.pem
+    namespacePrefix: east-
+    enabled: true
+
+  west:
+    url: http://cert.sealedsecrets.west.example.com/v1/cert.pem
+    enabled: false
+    namespacePrefix: west-
+
+  global:
+    url: http://cert.sealedsecrets.global.example.com/v1/cert.pem
+    enabled: false
+

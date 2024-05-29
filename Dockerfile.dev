@@ -1,0 +1,6 @@
+# syntax=docker/dockerfile:1
+FROM zauberzeug/nicegui:1.4.26
+
+ENV CONFIG=/config/config.yaml
+
+ADD --chmod=555 bin/kubeseal /usr/local/bin/kubeseal
