@@ -3,6 +3,7 @@ A simple web-gui for Bitnami's kubeseal / sealed-secrets, based on [nicegui](htt
 ## Features
 - Encrypt multiple secrets all at once.
 - Supports encrypting for multiple clusters with different encryption keys.
+- Choose sealing-scope: *strict, namespace-wide, cluster-wide*
 - Fetches encryption key via http/s from the sealed-secrets controller URL
 - Generates the encrypted string + the complete *sealed-secrets* manifest
 - Copy buttons for easy *copy & paste* of encrypted strings.
@@ -34,7 +35,7 @@ A simple web-gui for Bitnami's kubeseal / sealed-secrets, based on [nicegui](htt
 - Deploys to namespace `sealed-secrets` by default!  
 
 ```
-kustomize build k8s/base | kubectl apply -f -
+kustomize build k8s/env/demo | kubectl apply -f -
 ```
 
 # Configuration
@@ -66,6 +67,7 @@ clusters:
   global:
     url: http://cert.sealedsecrets.global.example.com/v1/cert.pem
     enabled: false
-
-
 ```
+
+# Demo
+![Demo](docs/demo.png)
