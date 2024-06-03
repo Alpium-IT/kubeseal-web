@@ -1,9 +1,13 @@
 # About
-A simple web-gui for Bitnami's [sealed-secrets](https://github.com/bitnami-labs/sealed-secrets/), based on the awesome [nicegui](https://nicegui.io/) Python UI framework.
+A simple web-gui for Bitnami's [sealed-secrets](https://github.com/bitnami-labs/sealed-secrets/), based on the awesome [nicegui](https://nicegui.io/) Python UI framework.  
+  
+The actual secret encryption process is done on the server-side using the kubeseal binary, so be sure to use a secure connection to access this web-app!  
+As we simply use `kubeseal --cert <URL> ...` for secret encryption internally, the host serving this web-app is the only one requiring http/s access to the sealedsecrets controller web-url, to retrieve the public encryption key.
 ## Features
 - Encrypt multiple secrets all at once.
 - Supports encrypting for multiple clusters with different encryption keys.
-- Choose sealing-scope: *strict, namespace-wide, cluster-wide*
+- Choose [sealing-scope](https://github.com/bitnami-labs/sealed-secrets/?tab=readme-ov-file#scopes): *strict, namespace-wide, cluster-wide*
+  - *cluster-wide* scope is potentially dangerous and can be disabled in `config.yaml`
 - Fetches encryption key via http/s from the sealed-secrets controller URL
 - Generates the encrypted string + the complete *sealed-secrets* manifest
 - Copy buttons for easy *copy & paste* of encrypted strings.
