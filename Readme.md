@@ -5,7 +5,7 @@ The actual secret encryption process is done on the server-side using the kubese
 As we simply use `kubeseal --cert <URL> ...` for secret encryption internally, the host serving this web-app is the only one requiring http/s access to the sealedsecrets controller web-url, to retrieve the public encryption key.
 ## Features
 - Encrypt multiple secrets all at once.
-- Supports encrypting for multiple clusters with different encryption keys.
+- Supports encrypting for multiple clusters with different encryption keys. See example [config](./k8s/envs/demo/files/config.yaml).
 - Choose [sealing-scope](https://github.com/bitnami-labs/sealed-secrets/?tab=readme-ov-file#scopes): *strict, namespace-wide, cluster-wide*
   - *cluster-wide* scope is potentially dangerous and can be disabled in `config.yaml`
 - Fetches encryption key via http/s from the sealed-secrets controller URL
