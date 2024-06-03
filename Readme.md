@@ -1,5 +1,5 @@
 # About
-A simple web-gui for Bitnami's kubeseal / sealed-secrets, based on [nicegui](https://nicegui.io/).
+A simple web-gui for Bitnami's [sealed-secrets](https://github.com/bitnami-labs/sealed-secrets/), based on the awesome [nicegui](https://nicegui.io/) Python UI framework.
 ## Features
 - Encrypt multiple secrets all at once.
 - Supports encrypting for multiple clusters with different encryption keys.
@@ -15,6 +15,7 @@ A simple web-gui for Bitnami's kubeseal / sealed-secrets, based on [nicegui](htt
 # Building
 
 ## Prereqs:
+
 - Download kubeseal and unpack to bin/ directory!  
   Example for kubeseal v0.26.3:
     ```
@@ -23,14 +24,31 @@ A simple web-gui for Bitnami's kubeseal / sealed-secrets, based on [nicegui](htt
     && tar xzf ks.tgz kubeseal \
     && rm ks.tgz
     ```
- -  Build image and push to your registry, eg:
+ -  Build the image and push to your registry, eg:
     ```
-    docker buildx build --push
+    docker compose build --push
     ```
  
  
 # Deploying
-## k8s
+## Prereqs:
+- Sealed-Secrets controller installed in your cluster ;-)  =>
+  [Install Sealed-Secrets](https://github.com/bitnami-labs/sealed-secrets/?tab=readme-ov-file#installation)
+  
+- Ingress exposing your sealed-secrets controller public encryption-key!  
+  Can easily be done during installation using Bitnami's Helm chart:
+  ```
+  values:
+    ingress:
+      enabled: true  # default: false
+      hostname: "cert.sealedsecrets.east.example.com"
+      # optional: Default path for the ingress record
+      # path: /v1/cert.pem
+  ```
+
+
+## Deploy to k8s
+- See folder [k8s](./k8s/). 
 - Uses *kustomize*. Modify/create overlay if required.
 - Deploys to namespace `sealed-secrets` by default!  
 
