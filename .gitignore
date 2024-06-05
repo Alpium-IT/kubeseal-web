@@ -1,2 +1,3 @@
 bin/kubeseal
 k8s/envs/epyc/**
+docker-compose-dev.yml
