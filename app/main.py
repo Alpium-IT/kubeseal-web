@@ -225,14 +225,18 @@ async def main():
             ui.icon('check_box_outline_blank', size='xs').classes('opacity-50 hover:opacity-90 p-0').on("click", lambda: [x.set_value(False) for x in getChildElements(container_clusters)])
             # build the cluster selection checkboxes
             with ui.row() as container_clusters:
-                for clusterName, obj in clusterConfig['clusters'].items():
-                    ui.checkbox(clusterName).tooltip(f"prefix={obj.get('namespacePrefix','n/a')}  |   url={obj['url']}" ).set_value(True if obj['enabled'] == True else False)
+                for clusterName, configObj in clusterConfig['clusters'].items():
+                    with ui.checkbox(clusterName) as checkbox:
+                        checkbox.set_value(True if configObj['enabled'] == True else False)
+                        ui.tooltip(f"URL: {configObj['url']}\nNAMESPACE PREFIX: {configObj.get('namespacePrefix','n/a')}" ).classes('bg-sky-600 text-white text-sm').style('white-space: pre-wrap')
 
 
         # sealing options
         with ui.row().classes('items-center'):    
             ui.label(f"SEALING SCOPE").classes('font-bold text-sky-500')
-            scope = ui.toggle(SCOPES, value=SCOPES[DEF_SCOPE_IDX]).props('glossy no-caps').classes('ml-4').tooltip('STRICT: cannot change secret name; NAMESPACE-WIDE: ok to rename encrypted secret later inside *same* namespace; CLUSTER-WIDE: use only in exceptional cases!')
+            tt_text = 'STRICT: You must not change secret name after encryption!\nNAMESPACE-WIDE: ok to rename encrypted secret later inside *same* namespace.\nCLUSTER-WIDE: will decrypt in any namespace. - ☝ Use in exceptional cases only! ☝'
+            with ui.toggle(SCOPES, value=SCOPES[DEF_SCOPE_IDX]).props('glossy no-caps').classes('ml-4') as scope:
+                ui.tooltip(tt_text).classes('bg-sky-600 text-white text-sm').style('white-space: pre-wrap')
 
 
 
