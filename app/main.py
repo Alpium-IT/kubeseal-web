@@ -84,8 +84,10 @@ async def main():
             secretVal = secret['value'].strip()
             encryptedString = secret['encrypted']
             ks_command = secret['cmd']
-            # append all encrypted strings to the output widget1/2
+            # append all encrypted strings to the output widget1 (and hidden widget2 for copying!
             s1 = s1 + f"\n\n# cmd: echo -n '{secretVal}' | {ks_command} \n# secret-key='{secretKey}'\n{encryptedString}"
+            if len(secretData) > 1:
+                s2 = s2 + f"\n# secret-key='{secretKey}'" # add comment before each secret if more than one secret displayed!
             s2 = s2 + f"\n{encryptedString}"
             allSecrets = allSecrets + f"    {secretKey}: {encryptedString}\n"
 
