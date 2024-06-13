@@ -85,7 +85,7 @@ async def main():
             encryptedString = secret['encrypted']
             ks_command = secret['cmd']
             # append all encrypted strings to the output widget1 (and hidden widget2 for copying!
-            s1 = s1 + f"\n\n# cmd: echo -n '{secretVal}' | {ks_command} \n# secret-key='{secretKey}'\n{encryptedString}"
+            s1 = s1 + f"\n\n# cmd: echo -n 'xxx' | {ks_command} \n# secret-key='{secretKey}'\n{encryptedString}"
             if len(secretData) > 1:
                 s2 = s2 + f"\n# secret-key='{secretKey}'" # add comment before each secret if more than one secret displayed!
             s2 = s2 + f"\n{encryptedString}"
@@ -200,7 +200,7 @@ async def main():
                 
                 i1 = ui.input(label='key',value=obj['key'], placeholder="e.g. user", validation={'Input too long': lambda value: len(value) < 1024, 'Required': lambda value: len(value) > 0}).classes(' p-1')
                 
-                i2 = ui.input(label='value',value=obj['value'], placeholder="e.g. top-secret!", validation={'Input too long': lambda value: len(value) < 1024, 'Required': lambda value: len(value) > 0}).classes(' p-1')
+                i2 = ui.input(label='value',value=obj['value'], placeholder="e.g. top-secret!", validation={'Input too long': lambda value: len(value) < 4096, 'Required': lambda value: len(value) > 0}).classes(' p-1')
                 i1.bind_value_to(secretData[idx], 'key')
                 i2.bind_value_to(secretData[idx], 'value')
 
