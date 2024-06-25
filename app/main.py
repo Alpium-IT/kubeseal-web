@@ -29,11 +29,11 @@ async def main():
 
     def clearAll():
         for clusterName in clusterConfig['clusters'].keys():
-            widgets = getChildElements(output_containers[clusterName])
-            widgets[1].set_value("# press Encrypt button!")
-            widgets[2].set_text("")
-            widgets[5].set_value("")
-            widgets[6].set_text("")
+            widgets = output_containers[clusterName]
+            widgets["INPUT1"].set_value("# press Encrypt button!")
+            widgets["HIDDEN_INPUT1"].set_text("")
+            widgets["INPUT2"].set_value("")
+            widgets["HIDDEN_INPUT2"].set_text("")
         ui.notify(f"Cleared all clusters!")
 
 
@@ -70,12 +70,12 @@ async def main():
         if prefix.value and clusterConfig['clusters'][clusterName].get('namespacePrefix', False):
             ns = clusterConfig['clusters'][clusterName]['namespacePrefix'] + namespace.value
 
-        widgets = getChildElements(output_containers[clusterName])
+        widgets = output_containers[clusterName ]
 
         for secret in secretData:
             await encryptSecret(clusterName, ns, secret)
-            widgets[1].set_value("")
-            widgets[2].set_text("")
+            widgets["INPUT1"].set_value("")
+            widgets["HIDDEN_INPUT1"].set_text("")
 
         # all secrets are now encrypted for this cluster!
         s1 = ""; s2 = ""; allSecrets = ""
@@ -92,8 +92,8 @@ async def main():
             allSecrets = allSecrets + f"    {secretKey}: {encryptedString}\n"
 
 
-        widgets[1].set_value(s1.lstrip())
-        widgets[2].set_text(s2.lstrip()) # set into hidden label for copying
+        widgets["INPUT1"].set_value(s1.lstrip()) 
+        widgets["HIDDEN_INPUT1"].set_text(s2.lstrip()) # set into hidden label for copying
         
         # also put into manifest widget
         if scope.value == SCOPE_CLUSTER_WIDE:
@@ -101,9 +101,9 @@ async def main():
         else:
             manifest_namespace = f"namespace: {ns}"
 
-        manifest = manifest_template.format(SCOPE=scope.value, SECRETNAME=secretName.value, NAMESPACE=manifest_namespace, ENCRYPTEDSECRETS=(allSecrets.rstrip()))
-        widgets[5].set_value(manifest)
-        widgets[6].set_text(manifest) # set into hidden label for copying
+        manifest = generic_secret_template.format(SCOPE=scope.value, SECRETNAME=secretName.value, NAMESPACE=manifest_namespace, ENCRYPTEDSECRETS=(allSecrets.rstrip()))
+        widgets["INPUT2"].set_value(manifest)
+        widgets["HIDDEN_INPUT2"].set_text(manifest) # set into hidden label for copying
 
 
 
@@ -193,7 +193,7 @@ async def main():
         aGrid.clear()
         with aGrid:
             for h in secretHeaders:
-                ui.label(h).classes('font-bold')
+                ui.label(h).classes('font-bold')    # first 2 labels will be invisible/empty for the icons!
             for idx, obj in enumerate(secretData):
                 ui.icon('add_box', color='green').classes('text-2xl pr-2 opacity-40 hover:opacity-90').on('click', lambda idx=idx: addSecret(idx))
                 ui.icon('remove_circle_outline', color='red').classes('text-2xl pr-3 opacity-40 hover:opacity-90').on('click', lambda idx=idx: removeSecret(idx))
@@ -288,13 +288,19 @@ async def main():
     with ui.column().classes("gap-16 w-full").style(f'width: {def_card_width}'):
         for cluster_chkbox in getChildElements(container_clusters):
             clName = cluster_chkbox.text
-            with ui.card().classes("w-full  ") as card:
+
+            with ui.card().classes("w-full") as card:
                 card.bind_visibility_from(cluster_chkbox, "value")
-                cont_cluster_output = ui.column().classes('items-left w-full').bind_visibility_from(cluster_chkbox, "value")
-                output_containers[cluster_chkbox.text] = cont_cluster_output
-                with cont_cluster_output:
+                
+                cluster_widgets = {}
+                output_containers[clName] = cluster_widgets
+                
+                container = ui.column().classes('items-left w-full').bind_visibility_from(cluster_chkbox, "value")
+                cluster_widgets["CONTAINER"] = container
+                
+                with container:
                     # LABEL FOR ENCRYPTED SECRET
-                    l = ui.label(f"Encrypted string for cluster: \"{cluster_chkbox.text}\" and namespace \"{'PREFIX ' + namespace.value if prefix.value else namespace.value}\"")
+                    l = ui.label(f"Encrypted string for cluster: \"{clName}\" and namespace \"{'PREFIX ' + namespace.value if prefix.value else namespace.value}\"")
                     l.classes('font-bold text-lg dark:text-sky-500')
                     l.bind_text_from(namespace, "value", backward=lambda ns=namespace.value, clName=clName: callb_update_label(ns, clName)) # creates a closure for the callback!
                     
@@ -307,6 +313,9 @@ async def main():
                     copyIcon = ui.icon('content_copy', size='xs').on('click', js_handler=f'() => navigator.clipboard.writeText(getElement("{copycode.id}").innerText)')
                     copyIcon.classes('absolute right-4 top-10 opacity-40 hover:opacity-80 cursor-pointer').tooltip('Copies the raw encrypted string(s) to clipboard')
 
+                    # store references for lates use to access the widgets
+                    cluster_widgets["INPUT1"] = code
+                    cluster_widgets["HIDDEN_INPUT1"] = copycode
 
                     # show another code field for the MANIFEST
                     ui.label(f"Complete Sealed-Secret Manifest").classes("font-semibold text-base dark:text-sky-500")
@@ -316,6 +325,10 @@ async def main():
                     copycode2 = ui.label().classes('hidden')
                     copyIcon2 = ui.icon('content_copy', size='xs').on('click', js_handler=f'() => navigator.clipboard.writeText(getElement("{copycode2.id}").innerText)')
                     copyIcon2.classes('absolute right-4 top-72 opacity-40 hover:opacity-80 cursor-pointer').tooltip('Copies the complete manifest to clipboard')
+
+                    # store references for lates use to access the widgets
+                    cluster_widgets["INPUT2"] = code2
+                    cluster_widgets["HIDDEN_INPUT2"] = copycode2
 
                     # ui.select(code.supported_themes, label='Theme').classes('w-32').bind_value(code, 'theme')
                     # ui.select(code2.supported_themes, label='Theme').classes('w-32').bind_value(code2, 'theme')
@@ -342,7 +355,7 @@ clusterConfig = {   # default config
   }
 }
 
-manifest_template = """
+generic_secret_template = """
 apiVersion: bitnami.com/v1alpha1
 kind: SealedSecret
 metadata:
