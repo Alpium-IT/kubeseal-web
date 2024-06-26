@@ -198,9 +198,10 @@ async def main():
                 ui.icon('add_box', color='green').classes('text-2xl pr-2 opacity-40 hover:opacity-90').on('click', lambda idx=idx: addSecret(idx))
                 ui.icon('remove_circle_outline', color='red').classes('text-2xl pr-3 opacity-40 hover:opacity-90').on('click', lambda idx=idx: removeSecret(idx))
                 
-                i1 = ui.input(label='key',value=obj['key'], placeholder="e.g. user", validation={'Input too long': lambda value: len(value) < 1024, 'Required': lambda value: len(value) > 0}).classes(' p-1')
+                i1 = ui.input(label='key',value=obj['key'], placeholder="e.g. user", validation={'Input too long': lambda value: len(value) < 1024, 'Required': lambda value: len(value) > 0}).classes('p-1').props('outlined')
                 
-                i2 = ui.input(label='value',value=obj['value'], placeholder="e.g. top-secret!", validation={'Input too long': lambda value: len(value) < 4096, 'Required': lambda value: len(value) > 0}).classes(' p-1')
+                i2 = ui.textarea(label='value',value=obj['value'], placeholder="e.g. top-secret!", validation={'Input too long': lambda value: len(value) < 4096, 'Required': lambda value: len(value) > 0}).classes('p-1').props('rows=1 outlined')
+                
                 i1.bind_value_to(secretData[idx], 'key')
                 i2.bind_value_to(secretData[idx], 'value')
 
@@ -268,7 +269,7 @@ async def main():
             secretName.props('size=80')
         
         # SECRET KEY and VALUE fields
-        secretsGrid = ui.grid(columns='30px 36px 1fr 2fr').classes('items-center w-5/6 gap-0 p-4 text-sky-600')
+        secretsGrid = ui.grid(columns='30px 36px 1fr 2fr').classes('items-start w-5/6 gap-0 p-4 text-sky-600')
         populateSecretGrid(secretsGrid)
 
         with ui.row().classes('items-center'):
