@@ -21,11 +21,21 @@ async def main():
 
     def_card_width = "95%"
 
-    secretHeaders = ['', '', 'Secret-Key', 'Secret-Value']
-    secretData = [
-        {"key": "user", "value": "secret!"}
-    ]
+    secretHeaders ={
+        TYPE_GENERIC: ['', '', 'Secret-Key', 'Secret-Value'],
+    }
 
+    secretData = {
+        TYPE_GENERIC: [
+            {"key": "user", "value": "secret!"}
+        ],
+        TYPE_DOCKER: [
+            {"label": 'Registry-URL',   "key": "docker-registry", "value": "quay.io"},
+            {"label": 'Email',          "key": "email",           "value": "user@example.com"},
+            {"label": 'User',           "key": "username",        "value": "user"},
+            {"label": 'Password',       "key": "password",        "value": "password"},
+        ],
+    }
 
     def clearAll():
         for clusterName in clusterConfig['clusters'].keys():
@@ -42,14 +52,22 @@ async def main():
             ui.notify("Secret Name is required for STRICT scope!", type="negative")
             return
         
-        for idx, obj in enumerate(secretData):
-            if not obj['key'].strip():
-                ui.notify(f"Key is required for secret {idx+1}!", type="negative")
-                return
-            if not obj['value'].strip():
-                ui.notify(f"Value is required for secret {idx+1}!", type="negative")
-                return
-            
+        # simple validation
+        if secret_type.value == TYPE_GENERIC:
+            for idx, obj in enumerate(secretData[TYPE_GENERIC]):
+                if not obj['key'].strip():
+                    ui.notify(f"Key is required for secret {idx+1}!", type="negative")
+                    return
+                if not obj['value'].strip():
+                    ui.notify(f"Value is required for secret {idx+1}!", type="negative")
+                    return
+                
+        elif secret_type.value == TYPE_DOCKER:
+            for idx, obj in enumerate(secretData[TYPE_DOCKER]):
+                if not obj['value'].strip():
+                    ui.notify(f"{obj['label']} is required!", type="negative")
+                    return
+                    
         if not namespace.value and scope.value != SCOPE_CLUSTER_WIDE:
             ui.notify("Namespace is required!", type="negative")
             return
@@ -72,21 +90,21 @@ async def main():
 
         widgets = output_containers[clusterName ]
 
-        for secret in secretData:
+        for secret in secretData[secret_type.value]:
             await encryptSecret(clusterName, ns, secret)
             widgets["INPUT1"].set_value("")
             widgets["HIDDEN_INPUT1"].set_text("")
 
         # all secrets are now encrypted for this cluster!
         s1 = ""; s2 = ""; allSecrets = ""
-        for secret in secretData:
+        for secret in secretData[secret_type.value]:
             secretKey = secret['key'].strip()
             secretVal = secret['value'].strip()
             encryptedString = secret['encrypted']
             ks_command = secret['cmd']
             # append all encrypted strings to the output widget1 (and hidden widget2 for copying!
             s1 = s1 + f"\n\n# cmd: echo -n 'xxx' | {ks_command} \n# secret-key='{secretKey}'\n{encryptedString}"
-            if len(secretData) > 1:
+            if len(secretData[secret_type.value]) > 1:
                 s2 = s2 + f"\n# secret-key='{secretKey}'" # add comment before each secret if more than one secret displayed!
             s2 = s2 + f"\n{encryptedString}"
             allSecrets = allSecrets + f"    {secretKey}: {encryptedString}\n"
@@ -174,37 +192,58 @@ async def main():
 
 
     def addSecret(index=0):
-        if len(secretData) >= MAX_SECRETS:
+        if len(secretData[TYPE_GENERIC]) >= MAX_SECRETS:
             ui.notify(f"won't add more than {MAX_SECRETS} secrets!", type="warning")
             return
-        secretData.insert(index + 1, {"key": f"user-{uuid.uuid4().hex[:4]}", "value": "secret"})
+        secretData[TYPE_GENERIC].insert(index + 1, {"key": f"user-{uuid.uuid4().hex[:4]}", "value": "secret"})
         # ui.notify(f"add index from: {index}")
         populateSecretGrid(secretsGrid)
 
     def removeSecret(index=0):
-        if len(secretData) > 1:
-            del secretData[index]
+        if len(secretData[TYPE_GENERIC]) > 1:
+            del secretData[TYPE_GENERIC][index]
             # ui.notify(f"remove index: {index}")
             populateSecretGrid(secretsGrid)
         else:
             ui.notify(f"won't remove last secret!", type="warning")
 
     def populateSecretGrid(aGrid: ui.grid):
+        if secret_type.value == TYPE_GENERIC:
+            populateSecretGrid_Generic(aGrid)
+        elif secret_type.value == TYPE_DOCKER:
+            populateSecretGrid_Docker(aGrid)
+        else:
+            ui.notify(f"Unknown secret type: {secret_type.value}", type="warning")
+
+    def populateSecretGrid_Docker(aGrid: ui.grid):
+        aGrid.clear()
+        aGrid.classes('')
+        with aGrid:
+            for idx, obj in enumerate(secretData[TYPE_DOCKER]):
+                ui.label(obj['label']).classes('col-span-3 p-1 font-bold')
+                i = ui.input(label=obj['key'],value=obj['value'], placeholder="", validation={'Input too long': lambda value: len(value) < 1024, 'Required': lambda value: len(value) > 0})
+                i.classes('p-1').props('outlined')
+                i.bind_value_to(obj, 'value')
+
+
+
+    def populateSecretGrid_Generic(aGrid: ui.grid):
         aGrid.clear()
         with aGrid:
-            for h in secretHeaders:
+            for h in secretHeaders[TYPE_GENERIC]:
                 ui.label(h).classes('font-bold')    # first 2 labels will be invisible/empty for the icons!
-            for idx, obj in enumerate(secretData):
+            for idx, obj in enumerate(secretData[TYPE_GENERIC]):
                 ui.icon('add_box', color='green').classes('text-2xl pr-2 opacity-40 hover:opacity-90').on('click', lambda idx=idx: addSecret(idx))
                 ui.icon('remove_circle_outline', color='red').classes('text-2xl pr-3 opacity-40 hover:opacity-90').on('click', lambda idx=idx: removeSecret(idx))
                 
                 i1 = ui.input(label='key',value=obj['key'], placeholder="e.g. user", validation={'Input too long': lambda value: len(value) < 1024, 'Required': lambda value: len(value) > 0}).classes('p-1').props('outlined')
                 
-                i2 = ui.textarea(label='value',value=obj['value'], placeholder="e.g. top-secret!", validation={'Input too long': lambda value: len(value) < 8000, 'Required': lambda value: len(value) > 0}).classes('p-1')
+                i2 = ui.textarea(label='value',value=obj['value'], placeholder="e.g. top-secret!", validation={'Input too long': lambda value: len(value) < 8000, 'Required': lambda value: len(value) > 0}).classes('p-1').style("font-family: monospace;")
                 i2.props('outlined autogrow input-class=max-h-56')
                 
-                i1.bind_value_to(secretData[idx], 'key')
-                i2.bind_value_to(secretData[idx], 'value')
+                i1.bind_value_to(secretData[TYPE_GENERIC][idx], 'key')
+                i2.bind_value_to(secretData[TYPE_GENERIC][idx], 'value')
+
 
     #########################################################################
     # CARD#1 : CLUSTER SELECTION
@@ -268,9 +307,20 @@ async def main():
                         placeholder='e.g. db-credentials', value="my-secret",
                         validation={'Input too long: > 64 chars!': lambda value: len(value) < 64, 'Required for generating the manifest!': lambda value: len(value) > 0})
             secretName.props('size=80 outlined')
-        
+
+        # SECRET TYPE Field
+        with ui.row().classes('items-center'):    
+            ui.label(f"Secret TYPE").classes("text-sky-600 font-bold w-24")
+            tt_text = 'todo'
+            with ui.toggle(S_TYPES, value=DEFAULT_SECRET_TYPE).props('no-caps').classes() as secret_type:
+                ui.tooltip(tt_text).classes('bg-sky-600 text-white text-sm').style('white-space: pre-wrap')
+            secret_type.on_value_change(lambda: populateSecretGrid(secretsGrid))
+
         # SECRET KEY and VALUE fields
-        secretsGrid = ui.grid(columns='30px 36px 1fr 2fr').classes('items-start w-5/6 gap-0 p-4 text-sky-600')
+        # secretsGrid = ui.grid(columns='30px 36px 1fr 2fr').classes('items-start w-5/6 gap-0 p-4 text-sky-600')
+        secretsGrid = ui.grid().classes('items-center w-5/6 gap-0 p-4 text-sky-600')
+        secretsGrid.style("grid-template-columns: auto auto auto 1fr")
+    
         populateSecretGrid(secretsGrid)
 
         with ui.row().classes('items-center'):
@@ -396,6 +446,12 @@ SCOPE_CLUSTER_WIDE = 'cluster-wide'
 
 SCOPES = [ SCOPE_STRICT, SCOPE_NS_WIDE ] 
 DEF_SCOPE_IDX = 1
+
+TYPE_GENERIC = "generic"
+TYPE_DOCKER  = "docker-registry" 
+S_TYPES = [ TYPE_GENERIC, TYPE_DOCKER ] 
+DEFAULT_SECRET_TYPE = TYPE_GENERIC
+
 
 if clusterConfig['defaults'].get('enable-cluster-wide-encryption', False):
     SCOPES.append(SCOPE_CLUSTER_WIDE)
