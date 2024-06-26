@@ -35,6 +35,10 @@ async def main():
             {"label": 'User',           "key": "username",        "value": "user"},
             {"label": 'Password',       "key": "password",        "value": "password"},
         ],
+        TYPE_TLS: [
+            {"label": 'Certificate',    "key": "cert", "value": ""},
+            {"label": 'Private Key',    "key": "key",  "value": ""},
+        ],
     }
 
     def clearAll():
@@ -192,6 +196,8 @@ async def main():
 
 
     def addSecret(index=0):
+        if secret_type.value != TYPE_GENERIC:
+            return
         if len(secretData[TYPE_GENERIC]) >= MAX_SECRETS:
             ui.notify(f"won't add more than {MAX_SECRETS} secrets!", type="warning")
             return
@@ -200,6 +206,8 @@ async def main():
         populateSecretGrid(secretsGrid)
 
     def removeSecret(index=0):
+        if secret_type.value != TYPE_GENERIC:
+            return
         if len(secretData[TYPE_GENERIC]) > 1:
             del secretData[TYPE_GENERIC][index]
             # ui.notify(f"remove index: {index}")
@@ -212,19 +220,28 @@ async def main():
             populateSecretGrid_Generic(aGrid)
         elif secret_type.value == TYPE_DOCKER:
             populateSecretGrid_Docker(aGrid)
+        elif secret_type.value == TYPE_TLS:
+            populateSecretGrid_TLS(aGrid)
         else:
             ui.notify(f"Unknown secret type: {secret_type.value}", type="warning")
 
+    def populateSecretGrid_TLS(aGrid: ui.grid):
+        aGrid.clear()
+        with aGrid:
+            for idx, obj in enumerate(secretData[TYPE_TLS]):
+                ui.label(obj['label']).classes('col-span-3 p-1 font-bold')
+                i = ui.textarea(label=obj['key'],value=obj['value'], placeholder="", validation={'Input too long': lambda value: len(value) < 8000, 'Required': lambda value: len(value) > 0})
+                i.classes('p-1 pl-4').props('outlined')
+                i.bind_value_to(obj, 'value')
+
     def populateSecretGrid_Docker(aGrid: ui.grid):
         aGrid.clear()
-        aGrid.classes('')
         with aGrid:
             for idx, obj in enumerate(secretData[TYPE_DOCKER]):
                 ui.label(obj['label']).classes('col-span-3 p-1 font-bold')
                 i = ui.input(label=obj['key'],value=obj['value'], placeholder="", validation={'Input too long': lambda value: len(value) < 1024, 'Required': lambda value: len(value) > 0})
-                i.classes('p-1').props('outlined')
+                i.classes('p-1 pl-4').props('outlined')
                 i.bind_value_to(obj, 'value')
-
 
 
     def populateSecretGrid_Generic(aGrid: ui.grid):
@@ -312,7 +329,7 @@ async def main():
         with ui.row().classes('items-center'):    
             ui.label(f"Secret TYPE").classes("text-sky-600 font-bold w-24")
             tt_text = 'todo'
-            with ui.toggle(S_TYPES, value=DEFAULT_SECRET_TYPE).props('no-caps').classes() as secret_type:
+            with ui.toggle(S_TYPES, value=DEFAULT_SECRET_TYPE).props('glossy no-caps').classes() as secret_type:
                 ui.tooltip(tt_text).classes('bg-sky-600 text-white text-sm').style('white-space: pre-wrap')
             secret_type.on_value_change(lambda: populateSecretGrid(secretsGrid))
 
@@ -449,7 +466,8 @@ DEF_SCOPE_IDX = 1
 
 TYPE_GENERIC = "generic"
 TYPE_DOCKER  = "docker-registry" 
-S_TYPES = [ TYPE_GENERIC, TYPE_DOCKER ] 
+TYPE_TLS  = "tls" 
+S_TYPES = [ TYPE_GENERIC, TYPE_DOCKER, TYPE_TLS ] 
 DEFAULT_SECRET_TYPE = TYPE_GENERIC
 
 
