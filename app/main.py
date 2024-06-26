@@ -200,7 +200,8 @@ async def main():
                 
                 i1 = ui.input(label='key',value=obj['key'], placeholder="e.g. user", validation={'Input too long': lambda value: len(value) < 1024, 'Required': lambda value: len(value) > 0}).classes('p-1').props('outlined')
                 
-                i2 = ui.textarea(label='value',value=obj['value'], placeholder="e.g. top-secret!", validation={'Input too long': lambda value: len(value) < 8000, 'Required': lambda value: len(value) > 0}).classes('p-1').props('rows=1 outlined')
+                i2 = ui.textarea(label='value',value=obj['value'], placeholder="e.g. top-secret!", validation={'Input too long': lambda value: len(value) < 8000, 'Required': lambda value: len(value) > 0}).classes('p-1')
+                i2.props('outlined autogrow input-class=max-h-56')
                 
                 i1.bind_value_to(secretData[idx], 'key')
                 i2.bind_value_to(secretData[idx], 'value')
