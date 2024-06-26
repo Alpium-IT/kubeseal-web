@@ -200,7 +200,7 @@ async def main():
                 
                 i1 = ui.input(label='key',value=obj['key'], placeholder="e.g. user", validation={'Input too long': lambda value: len(value) < 1024, 'Required': lambda value: len(value) > 0}).classes('p-1').props('outlined')
                 
-                i2 = ui.textarea(label='value',value=obj['value'], placeholder="e.g. top-secret!", validation={'Input too long': lambda value: len(value) < 4096, 'Required': lambda value: len(value) > 0}).classes('p-1').props('rows=1 outlined')
+                i2 = ui.textarea(label='value',value=obj['value'], placeholder="e.g. top-secret!", validation={'Input too long': lambda value: len(value) < 8000, 'Required': lambda value: len(value) > 0}).classes('p-1').props('rows=1 outlined')
                 
                 i1.bind_value_to(secretData[idx], 'key')
                 i2.bind_value_to(secretData[idx], 'value')
@@ -252,7 +252,7 @@ async def main():
             namespace = ui.input(label='Namespace of the Kubernetes Secret', 
                         placeholder='e.g. demo', value="demo",
                         validation={'Input too long: > 64 chars!': lambda value: len(value) < 64, 'Required': lambda value: len(value) > 0 or scope.value == SCOPE_CLUSTER_WIDE})
-            namespace.props('size=80')
+            namespace.props('size=80 outlined')
             
             # add PREFIX checkbox
             prefix = ui.checkbox("Use cluster-specific namespace prefix").tooltip('E.g. dev-demo for dev cluster. Prefix can be defined in config.yaml.')
@@ -266,7 +266,7 @@ async def main():
             secretName = ui.input(label='Name of Kubernetes Secret (can be changed later except when using the STRICT sealing scope!)', 
                         placeholder='e.g. db-credentials', value="my-secret",
                         validation={'Input too long: > 64 chars!': lambda value: len(value) < 64, 'Required for generating the manifest!': lambda value: len(value) > 0})
-            secretName.props('size=80')
+            secretName.props('size=80 outlined')
         
         # SECRET KEY and VALUE fields
         secretsGrid = ui.grid(columns='30px 36px 1fr 2fr').classes('items-start w-5/6 gap-0 p-4 text-sky-600')
