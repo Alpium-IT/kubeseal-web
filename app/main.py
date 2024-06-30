@@ -22,7 +22,7 @@ async def main():
     def_card_width = "95%"
 
     secretHeaders ={
-        TYPE_GENERIC: ['', '', 'Secret-Key', 'Secret-Value'],
+        TYPE_GENERIC: ['Secret-Key', 'Secret-Value'],
     }
 
     secretData = {
@@ -231,7 +231,7 @@ async def main():
             for idx, obj in enumerate(secretData[TYPE_TLS]):
                 ui.label(obj['label']).classes('col-span-3 p-1 font-bold')
                 i = ui.textarea(label=obj['key'],value=obj['value'], placeholder="", validation={'Input too long': lambda value: len(value) < 8000, 'Required': lambda value: len(value) > 0})
-                i.classes('p-1 pl-4').props('outlined')
+                i.classes('p-1 pl-4').props('outlined').style("font-family: monospace;") 
                 i.bind_value_to(obj, 'value')
 
     def populateSecretGrid_Docker(aGrid: ui.grid):
@@ -241,25 +241,27 @@ async def main():
                 ui.label(obj['label']).classes('col-span-3 p-1 font-bold')
                 i = ui.input(label=obj['key'],value=obj['value'], placeholder="", validation={'Input too long': lambda value: len(value) < 1024, 'Required': lambda value: len(value) > 0})
                 i.classes('p-1 pl-4').props('outlined')
+                # i.style("font-family: monospace;")
                 i.bind_value_to(obj, 'value')
 
 
     def populateSecretGrid_Generic(aGrid: ui.grid):
         aGrid.clear()
         with aGrid:
+            ui.label('').classes('col-span-2')    # first 2 grid cells need to be invisible/empty (+/- icons column!)
             for h in secretHeaders[TYPE_GENERIC]:
-                ui.label(h).classes('font-bold')    # first 2 labels will be invisible/empty for the icons!
+                ui.label(h).classes('font-bold pl-1')    # first 2 labels will be invisible/empty for the icons!
             for idx, obj in enumerate(secretData[TYPE_GENERIC]):
                 ui.icon('add_box', color='green').classes('text-2xl pr-2 opacity-40 hover:opacity-90').on('click', lambda idx=idx: addSecret(idx))
                 ui.icon('remove_circle_outline', color='red').classes('text-2xl pr-3 opacity-40 hover:opacity-90').on('click', lambda idx=idx: removeSecret(idx))
                 
-                i1 = ui.input(label='key',value=obj['key'], placeholder="e.g. user", validation={'Input too long': lambda value: len(value) < 1024, 'Required': lambda value: len(value) > 0}).classes('p-1').props('outlined')
+                inputKey = ui.input(label='key',value=obj['key'], placeholder="e.g. user", validation={'Input too long': lambda value: len(value) < 1024, 'Required': lambda value: len(value) > 0})
+                inputKey.props('outlined').classes('p-1').style("font-family: monospace;")
+                inputKey.bind_value_to(secretData[TYPE_GENERIC][idx], 'key')
                 
-                i2 = ui.textarea(label='value',value=obj['value'], placeholder="e.g. top-secret!", validation={'Input too long': lambda value: len(value) < 8000, 'Required': lambda value: len(value) > 0}).classes('p-1').style("font-family: monospace;")
-                i2.props('outlined autogrow input-class=max-h-56')
-                
-                i1.bind_value_to(secretData[TYPE_GENERIC][idx], 'key')
-                i2.bind_value_to(secretData[TYPE_GENERIC][idx], 'value')
+                inputVal = ui.textarea(label='value',value=obj['value'], placeholder="e.g. top-secret!", validation={'Input too long': lambda value: len(value) < 8000, 'Required': lambda value: len(value) > 0})
+                inputVal.props('outlined autogrow input-class=max-h-56').classes('p-1').style("font-family: monospace;")
+                inputVal.bind_value_to(secretData[TYPE_GENERIC][idx], 'value')
 
 
     #########################################################################
@@ -336,7 +338,7 @@ async def main():
         # SECRET KEY and VALUE fields
         # secretsGrid = ui.grid(columns='30px 36px 1fr 2fr').classes('items-start w-5/6 gap-0 p-4 text-sky-600')
         secretsGrid = ui.grid().classes('items-center w-5/6 gap-0 p-4 text-sky-600')
-        secretsGrid.style("grid-template-columns: auto auto auto 1fr")
+        secretsGrid.style("grid-template-columns: auto auto 1fr 3fr")
     
         populateSecretGrid(secretsGrid)
 
