@@ -30,10 +30,10 @@ async def main():
             {"key": "user", "value": "secret!"}
         ],
         TYPE_DOCKER: [
-            {"label": 'Registry-URL',   "key": "docker-registry", "value": "quay.io"},
-            {"label": 'Email',          "key": "email",           "value": "user@example.com"},
-            {"label": 'User',           "key": "username",        "value": "user"},
-            {"label": 'Password',       "key": "password",        "value": "password"},
+            {"label": 'Registry',    "key": "url",       "value": "https://quay.io"},
+            {"label": 'Email',       "key": "email",     "value": "user@example.com"},
+            {"label": 'User',        "key": "username",  "value": "user"},
+            {"label": 'Password',    "key": "password",  "value": "password"},
         ],
         TYPE_TLS: [
             {"label": 'Certificate',    "key": "cert", "value": ""},
