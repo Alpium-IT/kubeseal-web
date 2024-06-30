@@ -242,7 +242,7 @@ async def main():
             for idx, obj in enumerate(secretData[TYPE_DOCKER]):
                 ui.label(obj['label']).classes('col-span-3 p-1 font-bold')
                 i = ui.input(label=obj['key'],value=obj['value'], placeholder="", validation={'Input too long': lambda value: len(value) < 1024, 'Required': lambda value: len(value) > 0})
-                i.classes('p-1 pl-4').props('outlined')
+                i.classes('p-1 pl-4').props('outlined').style("font-family: monospace;") 
                 # i.style("font-family: monospace;")
                 i.bind_value_to(obj, 'value')
 
@@ -297,7 +297,7 @@ async def main():
         # sealing options
         with ui.row().classes('items-center'):    
             ui.label(f"SEALING SCOPE").classes('font-bold text-sky-500')
-            tt_text = 'STRICT: You must not change secret name after encryption!\nNAMESPACE-WIDE: ok to rename encrypted secret later inside *same* namespace.\nCLUSTER-WIDE: will decrypt in any namespace. - ☝ Use in exceptional cases only! ☝'
+            tt_text = 'STRICT: You must not change sealed-secret name after encryption!\nNAMESPACE-WIDE: ok to rename sealed-secret later inside *same* namespace.\nCLUSTER-WIDE: will decrypt in any namespace. - ☝ Use in exceptional cases only! ☝'
             with ui.toggle(SCOPES, value=SCOPES[DEF_SCOPE_IDX]).props('glossy no-caps').classes('ml-4') as scope:
                 ui.tooltip(tt_text).classes('bg-sky-600 text-white text-sm').style('white-space: pre-wrap')
 
