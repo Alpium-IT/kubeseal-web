@@ -227,6 +227,7 @@ async def main():
 
     def populateSecretGrid_TLS(aGrid: ui.grid):
         aGrid.clear()
+        aGrid.style("grid-template-columns: auto auto auto 3fr")
         with aGrid:
             for idx, obj in enumerate(secretData[TYPE_TLS]):
                 ui.label(obj['label']).classes('col-span-3 p-1 font-bold')
@@ -236,6 +237,7 @@ async def main():
 
     def populateSecretGrid_Docker(aGrid: ui.grid):
         aGrid.clear()
+        aGrid.style("grid-template-columns: auto auto auto 3fr")
         with aGrid:
             for idx, obj in enumerate(secretData[TYPE_DOCKER]):
                 ui.label(obj['label']).classes('col-span-3 p-1 font-bold')
@@ -247,6 +249,7 @@ async def main():
 
     def populateSecretGrid_Generic(aGrid: ui.grid):
         aGrid.clear()
+        aGrid.style("grid-template-columns: auto auto 2fr 3fr")
         with aGrid:
             ui.label('').classes('col-span-2')    # first 2 grid cells need to be invisible/empty (+/- icons column!)
             for h in secretHeaders[TYPE_GENERIC]:
@@ -337,8 +340,8 @@ async def main():
 
         # SECRET KEY and VALUE fields
         # secretsGrid = ui.grid(columns='30px 36px 1fr 2fr').classes('items-start w-5/6 gap-0 p-4 text-sky-600')
-        secretsGrid = ui.grid().classes('items-center w-5/6 gap-0 p-4 text-sky-600')
-        secretsGrid.style("grid-template-columns: auto auto 1fr 3fr")
+        secretsGrid = ui.grid().classes('items-center w-4/6 gap-0 p-4 text-sky-600')
+        secretsGrid.style("grid-template-columns: auto auto auto 3fr")
     
         populateSecretGrid(secretsGrid)
 
