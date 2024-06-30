@@ -317,9 +317,11 @@ async def main():
             namespace.props('size=80 outlined')
             
             # add PREFIX checkbox
-            prefix = ui.checkbox("Use cluster-specific namespace prefix").tooltip('E.g. dev-demo for dev cluster. Prefix can be defined in config.yaml.')
+            prefix = ui.checkbox("Use cluster-specific namespace prefix")
             prefix.on_value_change(lambda: refresh_namespace())
             prefix.set_value(False)
+            with prefix:
+                ui.tooltip('E.g. `dev-demo` on `dev` cluster.\nPrefixes can be defined in config.yaml.').classes('bg-sky-600 text-white text-sm').style('white-space: pre-wrap')
             
 
         # SECRET NAME Field
