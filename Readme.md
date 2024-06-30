@@ -12,6 +12,11 @@ As we simply use `kubeseal --cert <URL> ...` for secret encryption internally, t
 - Generates the encrypted string + the complete *sealed-secrets* manifest
 - Copy buttons for easy *copy & paste* of encrypted strings.
 - Configurable settings and cluster URLs in *config.yaml*
+- Supports multi-line secrets (eg. PEM files)
+- Secret types that can be created:
+  - generic
+  - dockerconfigjson
+  - tls
 
 
 
