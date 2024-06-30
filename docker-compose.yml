@@ -3,7 +3,7 @@ services:
   app:
     container_name: nicegui
     hostname: nicegui
-    image: quay.io/thikade/kubeseal-web:v1.1.0
+    image: quay.io/thikade/kubeseal-web:v1.1.1
     build:
         context: .
         dockerfile: Dockerfile

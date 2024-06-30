@@ -1,5 +1,5 @@
 # syntax=docker/dockerfile:1
-FROM zauberzeug/nicegui:1.4.26
+FROM zauberzeug/nicegui:1.4.28
 
 ENV CONFIG=/config/config.yaml
 

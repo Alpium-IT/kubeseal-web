@@ -14,7 +14,7 @@ spec:
       imagePullPolicy: Always
       containers:
       - name: kubeseal-web
-        image: quay.io/thikade/kubeseal-web:v1.0
+        image: quay.io/thikade/kubeseal-web:v1.1.1
         imagePullPolicy: Always
         livenessProbe:
           httpGet:
