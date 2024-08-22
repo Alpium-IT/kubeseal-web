@@ -14,8 +14,15 @@ spec:
       imagePullPolicy: Always
       containers:
       - name: kubeseal-web
-        image: quay.io/thikade/kubeseal-web:v1.1.1
+        image: ghcr.io/alpium-it/kubeseal-web:v1.2.0
         imagePullPolicy: Always
+        resources:
+          limits:
+            memory: "1024Mi"
+            cpu: "1000m"
+          requests:
+            memory: "256Mi"
+            cpu: "250m"
         livenessProbe:
           httpGet:
             path: /
@@ -31,7 +38,7 @@ spec:
         volumeMounts:
         - name: config
           mountPath: "/config"
-          readOnly: true        
+          readOnly: true
       volumes:
       - name: config
         configMap:

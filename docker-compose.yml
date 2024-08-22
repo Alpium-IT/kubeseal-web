@@ -3,10 +3,13 @@ services:
   app:
     container_name: nicegui
     hostname: nicegui
-    image: quay.io/thikade/kubeseal-web:v1.1.1
+    image: ${RELEASE_IMAGE:?e.g. RELEASE_IMAGE=gcr.io/user/kubeseal-web}:${RELEASE_TAG:?e.g. RELEASE_TAG=v1.2.3}
     build:
         context: .
         dockerfile: Dockerfile
+        args:
+            - NICEGUI_VERSION=${NICEGUI_VERSION:?e.g. NICEGUI_VERSION=1.4.35}
+            - KUBESEAL_VERSION=${KUBESEAL_VERSION:?e.g. KUBESEAL_VERSION=0.27.1}
     restart: always
     ports:
         - 8080:8080
