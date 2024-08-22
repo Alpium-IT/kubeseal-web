@@ -3,10 +3,8 @@ name: build & push
 on:
   workflow_dispatch:
   push:
-    branches:
-      - "**"
     tags:
-      - "v*.*.*"
+      - v**
 
     # paths:
     #   - '.env'
