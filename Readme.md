@@ -1,8 +1,8 @@
-# About
-A simple web-gui for Bitnami's [sealed-secrets](https://github.com/bitnami-labs/sealed-secrets/), based on the awesome [nicegui](https://nicegui.io/) Python UI framework.  
-  
-The actual secret encryption process is done on the server-side using the kubeseal binary, so be sure to use a secure connection to access this web-app!  
-As we simply use `kubeseal --cert <URL> ...` for secret encryption internally, the host serving this web-app is the only one requiring http/s access to the sealedsecrets controller web-url, to retrieve the public encryption key.
+# kubeseal-web
+![logo](/docs/ks_256.png)
+
+A simple web-gui for Bitnami's [sealed-secrets](https://github.com/bitnami-labs/sealed-secrets/), based on the awesome [nicegui](https://nicegui.io/) Python UI framework.
+
 ## Features
 - Encrypt multiple secrets all at once.
 - Supports encrypting for multiple clusters with different encryption keys. See example [config](./k8s/envs/demo/files/config.yaml).
@@ -19,34 +19,36 @@ As we simply use `kubeseal --cert <URL> ...` for secret encryption internally, t
   - tls
 
 
+### Note:
+The actual secret encryption process is done on the server-side using the kubeseal binary, so be sure to use a secure connection to access this web-app!
+
+As we use `kubeseal --cert <URL> ...` for secret encryption internally, the host serving this web-app is the only one requiring http/s access to the sealedsecrets controller web-url, to retrieve the public encryption key.
+
+
 
 
 # Building
 
-## Prereqs:
-
-- Download kubeseal and unpack to bin/ directory!  
-  Example for kubeseal v0.26.3:
-    ```
-    cd bin && \
-    curl  -o ks.tgz -L https://github.com/bitnami-labs/sealed-secrets/releases/download/v0.26.3/kubeseal-0.26.3-linux-amd64.tar.gz \
-    && tar xzf ks.tgz kubeseal \
-    && rm ks.tgz
-    ```
- -  Build the image and push to your registry, eg:
+-  Update these ENV vars in [.env](.env):
+   ```
+   RELEASE_IMAGE=ghcr.io/alpium-it/kubeseal-web
+   RELEASE_TAG=v1.1.3
+   ```
+-  Build the image and push to your registry, eg:
     ```
     docker compose build --push
     ```
- 
- 
+
+
 # Deploying
 ## Prereqs:
 - Sealed-Secrets controller installed in your cluster ;-)  =>
   [Install Sealed-Secrets](https://github.com/bitnami-labs/sealed-secrets/?tab=readme-ov-file#installation)
-  
-- Ingress exposing your sealed-secrets controller public encryption-key!  
-  Can easily be done during installation using Bitnami's Helm chart:
+
+- Enable the ingress, thus exposing your sealed-secrets controller public encryption-key via URL!
+  This can easily be done during installation of Bitnami's `Sealed-Secrets` Helm chart:
   ```
+  ...
   values:
     ingress:
       enabled: true  # default: false
@@ -57,20 +59,20 @@ As we simply use `kubeseal --cert <URL> ...` for secret encryption internally, t
 
 
 ## Deploy to k8s
-- See folder [k8s](./k8s/). 
-- Uses *kustomize*. Modify/create overlay if required.
-- Deploys to namespace `sealed-secrets` by default!  
+- See folder [k8s](./k8s/). Uses *kustomize*.
+  Modify/create overlay if required.
+- Deploys to namespace `sealed-secrets` by default!
+- Optionally edit `newName` & `newTag` in file [kustomization.yaml](k8s/envs/demo/kustomization.yaml)
+- Run `kustomize build k8s/env/demo | kubectl apply -f -`
 
-```
-kustomize build k8s/env/demo | kubectl apply -f -
-```
+
 
 # Configuration
 ## config.yaml
 
 ```
 # clusters dictionary
-# 
+#
 # CLUSTERNAME:
 #    url: <URL OF SEALED-SECRETS ROUTE>
 #    namespacePrefix: "dev-"  # will be prepended to the namespace's name
@@ -95,6 +97,7 @@ clusters:
     url: http://cert.sealedsecrets.global.example.com/v1/cert.pem
     enabled: false
 ```
+
 
 # Demo
 ![Demo](docs/demo.png)
