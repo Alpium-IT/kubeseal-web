@@ -7,3 +7,8 @@ resources:
 - deployment.yaml
 - service.yaml
 - route.yaml
+
+images:
+- name: kubeseal-web
+  newName: ghcr.io/alpium-it/kubeseal-web
+  newTag: v1.1.3
