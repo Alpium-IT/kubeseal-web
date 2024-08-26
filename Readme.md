@@ -100,4 +100,4 @@ clusters:
 
 
 # Demo
-![Demo](docs/demo.png)
+![Demo](docs/demo.gif)
