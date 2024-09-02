@@ -11,4 +11,4 @@ resources:
 images:
 - name: kubeseal-web
   newName: ghcr.io/alpium-it/kubeseal-web
-  newTag: v1.1.5
+  newTag: v1.2.1
