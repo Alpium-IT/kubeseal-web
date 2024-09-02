@@ -1,0 +1,32 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: sealed-secrets
+resources:
+  - github.com/Alpium-IT/kubeseal-web/k8s/base?ref=main
+
+images:
+- name: kubeseal-web
+  newName: ghcr.io/alpium-it/kubeseal-web
+  newTag: v1.1.5
+
+configMapGenerator:
+- name: kubeseal-config
+  literals:
+  - |-
+      config.yaml=
+      # default settings
+      defaults:
+        enable-cluster-wide-encryption: false
+        max-secrets: 5
+      #
+      # clusters dictionary
+      clusters:
+        qa:
+          url: http://cert.sealedsecrets.qa.example.com/v1/cert.pem
+          namespacePrefix: qa-
+          enabled: true
+        prod:
+          url: http://cert.sealedsecrets.prod.example.com/v1/cert.pem
+          enabled: true
+          namespacePrefix: prod-
