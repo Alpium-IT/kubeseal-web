@@ -1,5 +1,6 @@
 # kubeseal-web
-![logo](/docs/ks_256.png)
+[![logo](/docs/kubeseal-256.jpg)](/docs/kubeseal-512.jpg)
+
 
 A simple web-gui for Bitnami's [sealed-secrets](https://github.com/bitnami-labs/sealed-secrets/), based on the awesome [nicegui](https://nicegui.io/) Python UI framework.
 
