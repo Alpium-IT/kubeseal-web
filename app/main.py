@@ -96,8 +96,8 @@ async def main():
             return
         if not secretName.value:
             secretName.set_value("my-secret")
-            ui.notify(f"Secret Name defauled to '{secretName.value}'", type="warning") 
-        
+            ui.notify(f"Secret Name defauled to '{secretName.value}'", type="warning")
+
         # do some validation
         if secret_type.value == TYPE_GENERIC:
             for idx, obj in enumerate(secretData[TYPE_GENERIC]):
@@ -107,14 +107,14 @@ async def main():
                 if not obj['value'].strip():
                     ui.notify(f"Value is required for secret {idx+1}!", type="negative")
                     return
-                
+
         elif secret_type.value == TYPE_DOCKER:
             for entry in ["url", "user", "pass"]:
                 obj = secretData[TYPE_DOCKER][0][entry]
                 if not obj['value'].strip():
                     ui.notify(f"{obj['label']} is required!", type="negative")
                     return
-                    
+
         if not namespace.value and scope.value != SCOPE_CLUSTER_WIDE:
             ui.notify("Namespace is required!", type="negative")
             return
@@ -137,7 +137,7 @@ async def main():
             dockerConfig = secretData[TYPE_DOCKER][0]
             DOCKER_REGISTRY = f"{dockerConfig['url']['value'].strip()}"
             AUTH_STRING = f"{dockerConfig['user']['value'].strip()}:{dockerConfig['pass']['value'].strip()}"
-            CONFIG_JSON='{ "auths": { "' + DOCKER_REGISTRY + '": { "auth": "' + b64enc(AUTH_STRING) + '" } } }'.strip() 
+            CONFIG_JSON='{ "auths": { "' + DOCKER_REGISTRY + '": { "auth": "' + b64enc(AUTH_STRING) + '" } } }'.strip()
             dockerConfig['value'] = CONFIG_JSON
 
         # loop over all secretData entries and encrypt them
@@ -165,9 +165,9 @@ async def main():
             allSecrets = allSecrets + f"    {secretKey}: {encryptedString}\n"
 
 
-        widgets["INPUT1"].set_value(s1.lstrip()) 
+        widgets["INPUT1"].set_value(s1.lstrip())
         widgets["HIDDEN_INPUT1"].set_text(s2.lstrip()) # set into hidden label for copying
-        
+
         # also put into manifest widget
         if scope.value == SCOPE_CLUSTER_WIDE:
             manifest_namespace = f"namespace: null"
@@ -191,7 +191,7 @@ async def main():
             ks_param_name = f"--name {secretName.value}"
         else:
             ks_param_name = ""
-        
+
         if scope.value == SCOPE_CLUSTER_WIDE:
             ks_param_namespace = ""
         else:
@@ -200,7 +200,7 @@ async def main():
         command1 = f"echo -n '{secretVal}'"
         process1 = await asyncio.create_subprocess_exec(
             *shlex.split(command1, posix='win' not in sys.platform.lower()),
-            stdout=write, 
+            stdout=write,
             stderr=asyncio.subprocess.STDOUT,
             cwd=os.path.dirname(os.path.abspath(__file__))
         )
@@ -216,13 +216,13 @@ async def main():
         os.close(read)
 
         # NOTE we need to read the output in chunks, otherwise the process2 will block
-        output = '' 
+        output = ''
         while True:
             new = await process2.stdout.read(4096)
             if not new:
                 break
             output += new.decode()
-        
+
         # store in secretData dictionary
         secret['enc'] = output
         secret['cmd'] = ks_command
@@ -237,7 +237,7 @@ async def main():
 
 
     def callb_update_label(namespace: str, clusterName: str) -> str:
-        # ui.notify(f"Prefix is {prefix.value}")  
+        # ui.notify(f"Prefix is {prefix.value}")
         if not namespace:
             ns = "n/a"
         elif prefix.value and clusterConfig['clusters'][clusterName].get('namespacePrefix', False):
@@ -284,7 +284,7 @@ async def main():
             for idx, obj in enumerate(secretData[TYPE_TLS]):
                 ui.label(obj['label']).classes('col-span-3 p-1 font-bold')
                 i = ui.textarea(label=obj['key'],value=obj['value'], placeholder="", validation={'Input too long': lambda value: len(value) < 8000, 'Required': lambda value: len(value) > 0})
-                i.classes('p-1 pl-4').props('outlined').style("font-family: monospace;") 
+                i.classes('p-1 pl-4').props('outlined').style("font-family: monospace;")
                 i.bind_value_to(obj, 'value')
 
     def populateSecretGrid_Docker(aGrid: ui.grid):
@@ -295,7 +295,7 @@ async def main():
                 obj = secretData[TYPE_DOCKER][0][entry]
                 ui.label(obj['label']).classes('col-span-3 p-1 font-bold')
                 i = ui.input(label=obj['key'],value=obj['value'], placeholder="", validation={'Input too long': lambda value: len(value) < 1024, 'Required': lambda value: len(value) > 0})
-                i.classes('p-1 pl-4').props('outlined').style("font-family: monospace;") 
+                i.classes('p-1 pl-4').props('outlined').style("font-family: monospace;")
                 i.bind_value_to(obj, 'value')
 
 
@@ -309,11 +309,11 @@ async def main():
             for idx, obj in enumerate(secretData[TYPE_GENERIC]):
                 ui.icon('add_box', color='green').classes('text-2xl pr-2 opacity-40 hover:opacity-90').on('click', lambda idx=idx: addSecret(idx))
                 ui.icon('remove_circle_outline', color='red').classes('text-2xl pr-3 opacity-40 hover:opacity-90').on('click', lambda idx=idx: removeSecret(idx))
-                
+
                 inputKey = ui.input(label='key',value=obj['key'], placeholder="e.g. user", validation={'Input too long': lambda value: len(value) < 1024, 'Required': lambda value: len(value) > 0})
                 inputKey.props('outlined').classes('p-1').style("font-family: monospace;")
                 inputKey.bind_value_to(secretData[TYPE_GENERIC][idx], 'key')
-                
+
                 inputVal = ui.textarea(label='value',value=obj['value'], placeholder="e.g. top-secret!", validation={'Input too long': lambda value: len(value) < 8000, 'Required': lambda value: len(value) > 0})
                 inputVal.props('outlined autogrow input-class=max-h-56').classes('p-1').style("font-family: monospace;")
                 inputVal.bind_value_to(secretData[TYPE_GENERIC][idx], 'value')
@@ -323,7 +323,7 @@ async def main():
     # CARD#1 : CLUSTER SELECTION
     #########################################################################
     with ui.card().style(f'width: {def_card_width}'):
-        
+
         with ui.row().classes('w-full justify-end'):
             dark = ui.dark_mode()
             dark.auto()
@@ -332,7 +332,7 @@ async def main():
                 ui.button('Light', on_click=dark.disable, color='white').props('push text-color=black').style('font-size: 0.8em')
                 # ui.button('Auto', on_click=dark.auto, color='white').props('push text-color=black').style('font-size: 0.8em')
 
-        
+
         # CLUSTER SELECTION
         with ui.row().classes('items-center gap-4'):
             ui.label(f"CLUSTERS").classes('font-bold text-sky-500')
@@ -347,7 +347,7 @@ async def main():
 
 
         # sealing options
-        with ui.row().classes('items-center'):    
+        with ui.row().classes('items-center'):
             ui.label(f"SEALING SCOPE").classes('font-bold text-sky-500')
             tt_text = 'STRICT: You must not change sealed-secret name after encryption!\nNAMESPACE-WIDE: ok to rename sealed-secret later inside *same* namespace.\nCLUSTER-WIDE: will decrypt in any namespace. - ☝ Use in exceptional cases only! ☝'
             with ui.toggle(SCOPES, value=SCOPES[DEF_SCOPE_IDX]).props('glossy no-caps').classes('ml-4') as scope:
@@ -363,29 +363,29 @@ async def main():
         # SECRET NAMESPACE Field
         with ui.row().classes('items-center'):
             ui.label("Secret NAMESPACE").classes("text-sky-600 font-bold w-24")
-            namespace = ui.input(label='Namespace of the Kubernetes Secret', 
+            namespace = ui.input(label='Namespace of the Kubernetes Secret',
                         placeholder='e.g. demo', value="demo",
                         validation={'Input too long: > 64 chars!': lambda value: len(value) < 64, 'Required': lambda value: len(value) > 0 or scope.value == SCOPE_CLUSTER_WIDE})
             namespace.props('size=80 outlined')
-            
+
             # add PREFIX checkbox
             prefix = ui.checkbox("Use cluster-specific namespace prefix")
             prefix.on_value_change(lambda: refresh_namespace())
             prefix.set_value(False)
             with prefix:
                 ui.tooltip('E.g. `dev-demo` on `dev` cluster.\nPrefixes can be defined in config.yaml.').classes('bg-sky-600 text-white text-sm').style('white-space: pre-wrap')
-            
+
 
         # SECRET NAME Field
         with ui.row().classes('items-center'):
             ui.label("Secret NAME").classes("text-sky-600 font-bold w-24")
-            secretName = ui.input(label='Name of Kubernetes Secret (can be changed later except when using the STRICT sealing scope!)', 
+            secretName = ui.input(label='Name of Kubernetes Secret (can be changed later except when using the STRICT sealing scope!)',
                         placeholder='e.g. db-credentials', value="my-secret",
                         validation={'Input too long: > 64 chars!': lambda value: len(value) < 64, 'Required for generating the manifest!': lambda value: len(value) > 0})
             secretName.props('size=80 outlined')
 
         # SECRET TYPE Field
-        with ui.row().classes('items-center'):    
+        with ui.row().classes('items-center'):
             ui.label(f"Secret TYPE").classes("text-sky-600 font-bold w-24")
             tt_text = 'todo'
             with ui.toggle(S_TYPES, value=DEFAULT_SECRET_TYPE).props('glossy no-caps').classes() as secret_type:
@@ -396,7 +396,7 @@ async def main():
         # secretsGrid = ui.grid(columns='30px 36px 1fr 2fr').classes('items-start w-5/6 gap-0 p-4 text-sky-600')
         secretsGrid = ui.grid().classes('items-center w-4/6 gap-0 p-4 text-sky-600')
         secretsGrid.style("grid-template-columns: auto auto auto 3fr")
-    
+
         populateSecretGrid(secretsGrid)
 
         with ui.row().classes('items-center'):
@@ -411,7 +411,7 @@ async def main():
 
     # 1 OUTPUT CARD PER CLUSTER
     # keep track of cluster containers in this dict: output_containers
-    output_containers = {} 
+    output_containers = {}
 
     with ui.column().classes("gap-16 w-full").style(f'width: {def_card_width}'):
         for cluster_chkbox in getChildElements(container_clusters):
@@ -419,20 +419,20 @@ async def main():
 
             with ui.card().classes("w-full") as card:
                 card.bind_visibility_from(cluster_chkbox, "value")
-                
+
                 cluster_widgets = {}
                 output_containers[clName] = cluster_widgets
-                
+
                 container = ui.column().classes('items-left w-full').bind_visibility_from(cluster_chkbox, "value")
                 cluster_widgets["CONTAINER"] = container
-                
+
                 with container:
                     # LABEL FOR ENCRYPTED SECRET
                     l = ui.label(f"Encrypted string for cluster: \"{clName}\" and namespace \"{'PREFIX ' + namespace.value if prefix.value else namespace.value}\"")
                     l.classes('font-bold text-lg dark:text-sky-500')
                     l.bind_text_from(namespace, "value", backward=lambda ns=namespace.value, clName=clName: callb_update_label(ns, clName)) # creates a closure for the callback!
-                    
-                    # SEALED-SECRET OUTPUT TEXT FIELD 
+
+                    # SEALED-SECRET OUTPUT TEXT FIELD
                     # Visible SEALED-SECRET OUTPUT TEXT FIELD (YAML CODE MIRROR)
                     code = ui.codemirror(value="# press Encrypt button!", language="YAML", theme="quietlight", line_wrapping=True).classes("w-full h-48")
                     code.props("readonly")
@@ -479,7 +479,7 @@ clusterConfig = {   # default config
         'url': "http://cert.sealedsecrets.dev.example.com/v1/cert.pem",
         'namespacePrefix': "dev-",
         'enabled': 'true',
-    }    
+    }
   }
 }
 
@@ -497,7 +497,7 @@ spec:
   template:
     metadata:
       name: {SECRETNAME}
-      {NAMESPACE} 
+      {NAMESPACE}
       annotations:
         sealedsecrets.bitnami.com/{SCOPE}: "true"
     type: {SECRETTYPE}
@@ -521,13 +521,13 @@ SCOPE_STRICT = 'strict'
 SCOPE_NS_WIDE = 'namespace-wide'
 SCOPE_CLUSTER_WIDE = 'cluster-wide'
 
-SCOPES = [ SCOPE_STRICT, SCOPE_NS_WIDE ] 
+SCOPES = [ SCOPE_STRICT, SCOPE_NS_WIDE ]
 DEF_SCOPE_IDX = 1
 
 TYPE_GENERIC = "generic"
-TYPE_DOCKER  = "docker-registry" 
-TYPE_TLS  = "tls" 
-S_TYPES = [ TYPE_GENERIC, TYPE_DOCKER, TYPE_TLS ] 
+TYPE_DOCKER  = "docker-registry"
+TYPE_TLS  = "tls"
+S_TYPES = [ TYPE_GENERIC, TYPE_DOCKER, TYPE_TLS ]
 DEFAULT_SECRET_TYPE = TYPE_GENERIC
 
 
