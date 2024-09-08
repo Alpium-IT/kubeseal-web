@@ -170,7 +170,7 @@ async def main():
 
         # also put into manifest widget
         if scope.value == SCOPE_CLUSTER_WIDE:
-            manifest_namespace = f"namespace: null"
+            manifest_namespace = f"# namespace: {ns}"
         else:
             manifest_namespace = f"namespace: {ns}"
 
