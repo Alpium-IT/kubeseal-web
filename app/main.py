@@ -463,6 +463,7 @@ async def main():
 
     # Help text
     ui.label("Please select the cluster(s) you want to encrypt the secret for and click the 'ENCRYPT' button. The sealed secret will be displayed above.").style('color: grey; font-weight: normal')
+    ui.label(f"nicegui v{os.getenv('NICEGUI_VERSION')}").classes('text-sky-300')
 
 
 # MAIN
